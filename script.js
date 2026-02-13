@@ -45,9 +45,36 @@ const blackmail = [
 let noCount = 0;
 let yesBtnSize = 1;
 let noBtnSize = 1;
+let imagesPreloaded = false;
 
 // ─── DOM references ───
 const $ = (id) => document.getElementById(id);
+
+// ─── Image Preloader ───
+// Preloads all unique images in the background so celebration screens load instantly
+function preloadImages() {
+  // Deduplicate
+  const unique = [...new Set([...happyImages, ...sadImages])];
+  let loaded = 0;
+  const total = unique.length;
+
+  return new Promise((resolve) => {
+    if (total === 0) { resolve(); return; }
+    unique.forEach((src) => {
+      const img = new Image();
+      img.onload = img.onerror = () => {
+        loaded++;
+        if (loaded >= total) {
+          imagesPreloaded = true;
+          resolve();
+        }
+      };
+      img.src = src;
+    });
+    // Safety timeout — don't block forever if an image fails
+    setTimeout(() => { imagesPreloaded = true; resolve(); }, 12000);
+  });
+}
 
 // ─── Floating Hearts Background ───
 function createFloatingHearts() {
@@ -194,19 +221,23 @@ function buildScrollGrid() {
     { direction: "left", speed: "32s" },
   ];
 
-  rowConfigs.forEach((cfg) => {
+  // Use fewer images per row — 8 per set is enough for seamless scrolling
+  const imagesPerSet = 8;
+
+  rowConfigs.forEach((cfg, rowIdx) => {
     const row = document.createElement("div");
     row.classList.add("scroll-row", cfg.direction);
     row.style.setProperty("--speed", cfg.speed);
 
-    // Create enough images to fill the row twice (for seamless loop)
-    const imagesPerSet = 14;
+    // Two identical sets for seamless infinite loop
     for (let set = 0; set < 2; set++) {
       for (let i = 0; i < imagesPerSet; i++) {
         const img = document.createElement("img");
-        img.src = happyImages[i % happyImages.length];
+        // Offset each row so they don't all show the same image at the same position
+        const idx = (i + rowIdx * 3) % happyImages.length;
+        img.src = happyImages[idx];
         img.alt = "us";
-        img.loading = "lazy";
+        img.decoding = "async";
         row.appendChild(img);
       }
     }
@@ -214,8 +245,26 @@ function buildScrollGrid() {
   });
 }
 
-function goToCelebration() {
+function showLoading() {
+  const loader = $("loadingOverlay");
+  if (loader) loader.classList.add("show");
+}
+
+function hideLoading() {
+  const loader = $("loadingOverlay");
+  if (loader) loader.classList.remove("show");
+}
+
+async function goToCelebration() {
   $("happyModal").classList.remove("show");
+
+  // Show loading if images aren't preloaded yet
+  if (!imagesPreloaded) {
+    showLoading();
+    await preloadImages();
+    hideLoading();
+  }
+
   buildScrollGrid();
   switchScreen("questionScreen", "celebScreen1");
 }
@@ -227,7 +276,7 @@ function buildCascade() {
   const container = $("cascadeContainer");
   container.innerHTML = "";
 
-  const count = 20;
+  const count = 16;
   const sizes = [120, 140, 160, 180];
 
   for (let i = 0; i < count; i++) {
@@ -235,7 +284,7 @@ function buildCascade() {
     img.classList.add("cascade-img");
     img.src = happyImages[i % happyImages.length];
     img.alt = "love";
-    img.loading = "lazy";
+    img.decoding = "async";
 
     const size = sizes[Math.floor(Math.random() * sizes.length)];
     img.style.width = size + "px";
@@ -265,6 +314,9 @@ function goToCelebration2() {
 // ─────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   createFloatingHearts();
+
+  // Start preloading all images in the background immediately
+  preloadImages();
 
   // Typewriter on welcome screen
   setTimeout(() => {

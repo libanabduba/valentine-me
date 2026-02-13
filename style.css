@@ -461,6 +461,42 @@ body {
   }
 }
 
+/* ===================== LOADING OVERLAY ===================== */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(252, 228, 236, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+.loading-overlay.show {
+  display: flex;
+}
+.loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.loading-heart {
+  font-size: 60px;
+  animation: loadingPulse 1s ease infinite;
+}
+@keyframes loadingPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+}
+.loading-text {
+  font-family: "Dancing Script", cursive;
+  font-size: 1.6rem;
+  color: var(--pink-700);
+  font-weight: 600;
+}
+
 /* ===================== SPARKLES ===================== */
 .sparkle {
   position: fixed;
