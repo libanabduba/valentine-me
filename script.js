@@ -5,9 +5,21 @@
 // ─── Placeholder images (swap these with your real photos!) ───
 const happyImages = [
   "./resources/happy1.gif",
+  "./resources/img-3.png",
   "./resources/happy3.gif",
-  "./resources/heart.gif",
+  "./resources/img-4.png",
   "./resources/heart.jpeg",
+  "./resources/img-1.png",
+  "./resources/heart.gif",
+  "./resources/img-2.png",
+  "./resources/happy3.gif",
+  "./resources/img-5.png",
+  "./resources/heart.jpeg",
+  "./resources/img-4.png",
+  "./resources/happy1.gif",
+  // "./resources/img-6.png",
+  "./resources/img-7.png",
+  "./resources/img-8.png"
 ];
 
 const sadImages = [
