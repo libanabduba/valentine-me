@@ -46,9 +46,20 @@ let noCount = 0;
 let yesBtnSize = 1;
 let noBtnSize = 1;
 let imagesPreloaded = false;
+let happyPlayCount = 0;
+const MAX_HAPPY_PLAYS = 2;
 
 // ─── DOM references ───
 const $ = (id) => document.getElementById(id);
+
+// ─── Happy music: play at most 2 times ───
+function playHappy() {
+  const music = $("happyMusic");
+  if (happyPlayCount >= MAX_HAPPY_PLAYS) return;     // already played twice
+  if (!music.paused && !music.ended) return;          // already playing
+  music.currentTime = 0;
+  music.play().catch(() => {});
+}
 
 // ─── Image Preloader ───
 // Preloads all unique images in the background so celebration screens load instantly
@@ -187,9 +198,9 @@ function sayYes() {
   // Close sad modal
   $("sadModal").classList.remove("show");
 
-  // Stop sad, play happy
+  // Stop sad, play happy (only if we haven't reached the 2-play limit)
   $("sadMusic").pause();
-  $("happyMusic").play().catch(() => {});
+  playHappy();
 
   // Reset main image
   $("mainImg").src = "./resources/happy3.gif";
@@ -317,6 +328,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Start preloading all images in the background immediately
   preloadImages();
+
+  // Happy music: replay once when it ends (total = 2 plays), then stop
+  const happyMusic = $("happyMusic");
+  happyMusic.addEventListener("ended", () => {
+    happyPlayCount++;
+    if (happyPlayCount < MAX_HAPPY_PLAYS) {
+      happyMusic.currentTime = 0;
+      happyMusic.play().catch(() => {});
+    }
+  });
 
   // Typewriter on welcome screen
   setTimeout(() => {
